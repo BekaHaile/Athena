@@ -1,5 +1,6 @@
+import 'package:athena_2/Services/api.dart';
 import 'package:flutter/material.dart';
-import 'package:speech_to_text/speech_to_text.dart' as stt;
+// import 'package:speech_to_text/speech_to_text.dart' as stt;
 
 class AthenaHome extends StatefulWidget {
   @override
@@ -7,9 +8,9 @@ class AthenaHome extends StatefulWidget {
 }
 
 class _AthenaHomeState extends State<AthenaHome> {
-  stt.SpeechToText _speech;
+  // stt.SpeechToText _speech;
   bool _isListening = false;
-  double _confidence = 1.0;
+  // double _confidence = 1.0;
   bool initialized = false;
 
   @override
@@ -17,12 +18,6 @@ class _AthenaHomeState extends State<AthenaHome> {
     return Scaffold(
       body: body(),
     );
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    _speech = stt.SpeechToText();
   }
 
   Widget body() {
@@ -65,7 +60,9 @@ class _AthenaHomeState extends State<AthenaHome> {
         ),
         FloatingActionButton(
           onPressed: () {
-            Navigator.pushNamed(context, '/chatDetail');
+            // Navigator.pushNamed(context, '/chatDetail');
+            Map<String, String> data = {"message": "Hi", "sender": "id344"};
+            API().postData(data);
           },
           child: Icon(_isListening ? Icons.mic : Icons.mic_none),
         ),

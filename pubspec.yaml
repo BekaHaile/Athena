@@ -32,6 +32,7 @@ dependencies:
   avatar_glow: ^1.2.0
   highlight_text: ^0.7.2
   flutter_tts: ^2.0.0
+  http: ^0.12.2
 
 dev_dependencies:
   flutter_test:

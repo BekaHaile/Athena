@@ -3,6 +3,7 @@ import 'package:athena_2/Models/chat_message.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
+import 'package:speech_to_text/speech_to_text.dart' as stt;
 
 class ChatDetailPage extends StatefulWidget {
   @override
@@ -12,11 +13,19 @@ class ChatDetailPage extends StatefulWidget {
 class _ChatDetailPageState extends State<ChatDetailPage> {
   List<ChatMessage> chatMessage = [
     ChatMessage(message: "Hi I am athena, I can:", type: MessageType.Receiver),
+    ChatMessage(message: "  - Provide you with a list of recommended area restaurants", type: MessageType.Receiver),
+    ChatMessage(message: "  - Get you directions to the most frequently requested locations", type: MessageType.Receiver),
+    ChatMessage(message: "  - Get you a copy of the folio for your stay", type: MessageType.Receiver),
   ];
 
   TextEditingController messageController = TextEditingController();
   ScrollController _scrollController = new ScrollController();
   FlutterTts flutterTts = FlutterTts();
+
+  stt.SpeechToText _speech;
+  bool _isListening = false;
+  // double _confidence = 1.0;
+  bool initialized = false;
 
   void showModal() {
     showModalBottomSheet(
@@ -59,13 +68,17 @@ class _ChatDetailPageState extends State<ChatDetailPage> {
     super.initState();
 
     initializeTts();
+    _speech = stt.SpeechToText();
   }
 
   void initializeTts() async {
     await flutterTts.setLanguage("en-US");
     await flutterTts.setPitch(1);
 
-    await flutterTts.speak('I can');
+    await flutterTts.speak('Hi I am Athena, I can: ' 
+    + 'Provide you with a list of recommended area restaurants' 
+    + 'Get you directions to the most frequently requested locations'
+    + 'Get you a copy of the folio for your stay');
   }
 
   @override
@@ -91,44 +104,45 @@ class _ChatDetailPageState extends State<ChatDetailPage> {
               },
             ),
           ),
+          // Align(
+          //   alignment: Alignment.bottomLeft,
+          //   child: Container(
+          //     padding: EdgeInsets.only(left: 16, bottom: 10),
+          //     height: 80,
+          //     width: double.infinity,
+          //     color: Colors.white,
+          //     child: Row(
+          //       children: <Widget>[
+          //         Expanded(
+          //           child: TextField(
+          //             controller: messageController,
+          //             decoration: InputDecoration(
+          //                 hintText: "Type message...",
+          //                 hintStyle: TextStyle(color: Colors.grey.shade500),
+          //                 border: InputBorder.none),
+          //             onSubmitted: (value) {
+          //               sendSms();
+          //             },
+          //           ),
+          //         ),
+          //       ],
+          //     ),
+          //   ),
+          // ),
           Align(
-            alignment: Alignment.bottomLeft,
-            child: Container(
-              padding: EdgeInsets.only(left: 16, bottom: 10),
-              height: 80,
-              width: double.infinity,
-              color: Colors.white,
-              child: Row(
-                children: <Widget>[
-                  Expanded(
-                    child: TextField(
-                      controller: messageController,
-                      decoration: InputDecoration(
-                          hintText: "Type message...",
-                          hintStyle: TextStyle(color: Colors.grey.shade500),
-                          border: InputBorder.none),
-                      onSubmitted: (value) {
-                        sendSms();
-                      },
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          Align(
-            alignment: Alignment.bottomRight,
+            alignment: Alignment.bottomCenter,
             child: Container(
               padding: EdgeInsets.only(right: 30, bottom: 40),
               child: FloatingActionButton(
-                onPressed: () {
-                  sendSms();
+                onPressed: () async {
+                  // sendSms();
+                  _listen();
                 },
                 child: Icon(
-                  Icons.send,
+                  Icons.mic,
                   color: Colors.white,
                 ),
-                backgroundColor: Colors.pink,
+                backgroundColor: _isListening ? Colors.green : Colors.red,
                 elevation: 0,
               ),
             ),
@@ -138,16 +152,51 @@ class _ChatDetailPageState extends State<ChatDetailPage> {
     );
   }
 
-  void sendSms() async {
+  Future<bool> _initialize() async {
+    bool available = await _speech.initialize(onStatus: (val) {
+      print('onStatus: $val');
+    }, onError: (val) {
+      print('onError: $val');
+    });
+    initialized = true;
+    return available;
+  }
+
+  void _listen() async {
+    if (!initialized) {
+      if (!await _initialize()) print('error initializing');
+    }
+    if (!_isListening) {
+      setState(() => _isListening = true);
+      _speech.listen(
+          onResult: (val) {
+            setState(() {
+              print("***********" + val.recognizedWords);
+              _isListening = false;
+
+              if (val.recognizedWords != '') sendSms(val.recognizedWords);
+            });
+          },
+          listenFor: Duration(minutes: 2),
+          cancelOnError: false,
+          partialResults: false);
+    } else {
+      setState(() => _isListening = false);
+      _speech.stop();
+    }
+  }
+
+  void sendSms(String text) async {
     ChatMessage newMessage =
-        ChatMessage(message: messageController.text, type: MessageType.Sender);
+        ChatMessage(message: text, type: MessageType.Sender);
     setState(() {
       chatMessage.add(newMessage);
     });
 
     ChatMessage replyMessage = ChatMessage(
-        message: 'Did you say ' + messageController.text,
-        type: MessageType.Receiver);
+        message: 'Did you say "' + text + '"', type: MessageType.Receiver);
+        
+      await flutterTts.speak('Did you say ' + text);
     setState(() {
       chatMessage.add(replyMessage);
       FocusScope.of(context).unfocus();
@@ -159,7 +208,7 @@ class _ChatDetailPageState extends State<ChatDetailPage> {
       duration: const Duration(milliseconds: 300),
     );
 
-    await flutterTts.speak('Did you say ' + messageController.text);
+    // await flutterTts.speak('Did you say ' + messageController.text);
 
     messageController.text = '';
   }
