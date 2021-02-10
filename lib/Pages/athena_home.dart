@@ -60,9 +60,10 @@ class _AthenaHomeState extends State<AthenaHome> {
         ),
         FloatingActionButton(
           onPressed: () {
-            // Navigator.pushNamed(context, '/chatDetail');
-            Map<String, String> data = {"message": "Hi", "sender": "id344"};
-            API().postData(data);
+            Navigator.pushNamed(context, '/chatDetail');
+            // dynamic data = {"message": "Hi", "sender": "id344"};
+            // API().postData(data);
+            // API().getData();
           },
           child: Icon(_isListening ? Icons.mic : Icons.mic_none),
         ),

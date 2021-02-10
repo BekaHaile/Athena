@@ -1,5 +1,7 @@
+import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:athena_2/Components/chat_bubble.dart';
 import 'package:athena_2/Models/chat_message.dart';
+import 'package:athena_2/Services/api.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
@@ -13,12 +15,18 @@ class ChatDetailPage extends StatefulWidget {
 class _ChatDetailPageState extends State<ChatDetailPage> {
   List<ChatMessage> chatMessage = [
     ChatMessage(message: "Hi I am athena, I can:", type: MessageType.Receiver),
-    ChatMessage(message: "  - Provide you with a list of recommended area restaurants", type: MessageType.Receiver),
-    ChatMessage(message: "  - Get you directions to the most frequently requested locations", type: MessageType.Receiver),
-    ChatMessage(message: "  - Get you a copy of the folio for your stay", type: MessageType.Receiver),
+    ChatMessage(
+        message: "  - Provide you with a list of recommended area restaurants",
+        type: MessageType.Receiver),
+    ChatMessage(
+        message:
+            "  - Get you directions to the most frequently requested locations",
+        type: MessageType.Receiver),
+    ChatMessage(
+        message: "  - Get you a copy of the folio for your stay",
+        type: MessageType.Receiver),
   ];
 
-  TextEditingController messageController = TextEditingController();
   ScrollController _scrollController = new ScrollController();
   FlutterTts flutterTts = FlutterTts();
 
@@ -75,10 +83,10 @@ class _ChatDetailPageState extends State<ChatDetailPage> {
     await flutterTts.setLanguage("en-US");
     await flutterTts.setPitch(1);
 
-    await flutterTts.speak('Hi I am Athena, I can: ' 
-    + 'Provide you with a list of recommended area restaurants' 
-    + 'Get you directions to the most frequently requested locations'
-    + 'Get you a copy of the folio for your stay');
+    await flutterTts.speak('Hi I am Athena, I can: ' +
+        'Provide you with a list of recommended area restaurants' +
+        'Get you directions to the most frequently requested locations' +
+        'Get you a copy of the folio for your stay');
   }
 
   @override
@@ -104,31 +112,6 @@ class _ChatDetailPageState extends State<ChatDetailPage> {
               },
             ),
           ),
-          // Align(
-          //   alignment: Alignment.bottomLeft,
-          //   child: Container(
-          //     padding: EdgeInsets.only(left: 16, bottom: 10),
-          //     height: 80,
-          //     width: double.infinity,
-          //     color: Colors.white,
-          //     child: Row(
-          //       children: <Widget>[
-          //         Expanded(
-          //           child: TextField(
-          //             controller: messageController,
-          //             decoration: InputDecoration(
-          //                 hintText: "Type message...",
-          //                 hintStyle: TextStyle(color: Colors.grey.shade500),
-          //                 border: InputBorder.none),
-          //             onSubmitted: (value) {
-          //               sendSms();
-          //             },
-          //           ),
-          //         ),
-          //       ],
-          //     ),
-          //   ),
-          // ),
           Align(
             alignment: Alignment.bottomCenter,
             child: Container(
@@ -193,13 +176,15 @@ class _ChatDetailPageState extends State<ChatDetailPage> {
       chatMessage.add(newMessage);
     });
 
-    ChatMessage replyMessage = ChatMessage(
-        message: 'Did you say "' + text + '"', type: MessageType.Receiver);
-        
-      await flutterTts.speak('Did you say ' + text);
+    dynamic data = {"message": text, "sender": "id344"};
+    dynamic reply = await API().postData(data);
+
+    ChatMessage replyMessage =
+        ChatMessage(message: reply, type: MessageType.Receiver);
+
+    await flutterTts.speak(reply);
     setState(() {
       chatMessage.add(replyMessage);
-      FocusScope.of(context).unfocus();
     });
 
     _scrollController.animateTo(
@@ -207,9 +192,21 @@ class _ChatDetailPageState extends State<ChatDetailPage> {
       curve: Curves.easeOut,
       duration: const Duration(milliseconds: 300),
     );
+  }
 
-    // await flutterTts.speak('Did you say ' + messageController.text);
-
-    messageController.text = '';
+  Widget typingIndicator() {
+    return SizedBox(
+      width: 250.0,
+      child: TyperAnimatedTextKit(
+        onTap: () {
+          print("Tap Event");
+        },
+        text: [
+          "...",
+        ],
+        textStyle: TextStyle(fontSize: 30.0, fontFamily: "Bobbers"),
+        textAlign: TextAlign.start,
+      ),
+    );
   }
 }
