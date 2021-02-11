@@ -19,9 +19,8 @@ class MyApp extends StatelessWidget {
       ),
       home: AthenaHome(),
       routes: {
-          '/chatDetail': (BuildContext context) => ChatDetailPage(),
+        '/chatDetail': (BuildContext context) => ChatDetailPage(),
       },
     );
   }
 }
-

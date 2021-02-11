@@ -4,7 +4,7 @@ import 'dart:convert';
 class API {
   getData() async {
     var response = await http.get(
-        Uri.encodeFull("https://1a0e6649cd1d.ngrok.io/version"), //uri of api
+        Uri.encodeFull("https://e56ca5fb900d.ngrok.io/version"), //uri of api
         headers: {"Accept": "application/json"});
 
     Map<String, dynamic> data = jsonDecode(response.body);
@@ -16,7 +16,7 @@ class API {
     try {
       response = await http.post(
         Uri.encodeFull(
-            "https://a9933e0a94ee.ngrok.io/webhooks/rest/webhook"), //uri of api
+            "https://e56ca5fb900d.ngrok.io/webhooks/rest/webhook"), //uri of api
         headers: {
           "Accept": "application/json; charset=UTF-8",
         },
@@ -32,7 +32,7 @@ class API {
       if (response.body[0] == "[") print(res['text']); //Response from the api
       return res['text'];
     } else {
-      return "Coudln't understand you, sorry";
+      return "Couldn't understand you, sorry";
     }
   }
 }

@@ -1,4 +1,4 @@
-import 'package:athena_2/Services/api.dart';
+// import 'package:athena_2/Services/api.dart';
 import 'package:flutter/material.dart';
 // import 'package:speech_to_text/speech_to_text.dart' as stt;
 
@@ -51,7 +51,7 @@ class _AthenaHomeState extends State<AthenaHome> {
         Padding(
           padding: const EdgeInsets.only(top: 20.0, bottom: 10.0),
           child: Text(
-            'You can use me by saying "Hello Athena"',
+            'You can use me by clicking the mic below',
             style: TextStyle(
               fontSize: 18,
             ),

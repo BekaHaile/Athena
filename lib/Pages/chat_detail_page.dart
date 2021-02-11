@@ -35,42 +35,6 @@ class _ChatDetailPageState extends State<ChatDetailPage> {
   // double _confidence = 1.0;
   bool initialized = false;
 
-  void showModal() {
-    showModalBottomSheet(
-        context: context,
-        builder: (context) {
-          return Container(
-            height: MediaQuery.of(context).size.height / 2,
-            color: Color(0xff737373),
-            child: Container(
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.only(
-                    topRight: Radius.circular(20),
-                    topLeft: Radius.circular(20)),
-              ),
-              child: Column(
-                children: <Widget>[
-                  SizedBox(
-                    height: 16,
-                  ),
-                  Center(
-                    child: Container(
-                      height: 4,
-                      width: 50,
-                      color: Colors.grey.shade200,
-                    ),
-                  ),
-                  SizedBox(
-                    height: 10,
-                  ),
-                ],
-              ),
-            ),
-          );
-        });
-  }
-
   @override
   void initState() {
     super.initState();
@@ -98,7 +62,7 @@ class _ChatDetailPageState extends State<ChatDetailPage> {
       body: Stack(
         children: <Widget>[
           Container(
-            height: MediaQuery.of(context).size.height * 0.8,
+            height: MediaQuery.of(context).size.height * 0.78,
             child: ListView.builder(
               itemCount: chatMessage.length,
               shrinkWrap: true,
@@ -115,7 +79,7 @@ class _ChatDetailPageState extends State<ChatDetailPage> {
           Align(
             alignment: Alignment.bottomCenter,
             child: Container(
-              padding: EdgeInsets.only(right: 30, bottom: 40),
+              padding: EdgeInsets.only(right: 30, bottom: 15),
               child: FloatingActionButton(
                 onPressed: () async {
                   // sendSms();
@@ -138,7 +102,9 @@ class _ChatDetailPageState extends State<ChatDetailPage> {
   Future<bool> _initialize() async {
     bool available = await _speech.initialize(onStatus: (val) {
       print('onStatus: $val');
+      if (val == "notListening") setState(() => _isListening = false);
     }, onError: (val) {
+      setState(() => _isListening = false);
       print('onError: $val');
     });
     initialized = true;
@@ -152,17 +118,18 @@ class _ChatDetailPageState extends State<ChatDetailPage> {
     if (!_isListening) {
       setState(() => _isListening = true);
       _speech.listen(
-          onResult: (val) {
-            setState(() {
-              print("***********" + val.recognizedWords);
-              _isListening = false;
+        onResult: (val) {
+          setState(() {
+            print("***********" + val.recognizedWords);
+            _isListening = false;
 
-              if (val.recognizedWords != '') sendSms(val.recognizedWords);
-            });
-          },
-          listenFor: Duration(minutes: 2),
-          cancelOnError: false,
-          partialResults: false);
+            if (val.recognizedWords != '') sendSms(val.recognizedWords);
+          });
+        },
+        listenFor: Duration(minutes: 2),
+        cancelOnError: false,
+        partialResults: false,
+      );
     } else {
       setState(() => _isListening = false);
       _speech.stop();
